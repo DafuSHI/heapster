@@ -1,4 +1,4 @@
-Configuring sinks
+Configuring sources
 ===================
 
 Heapster can store data into different backends (sinks). These are specified on the command line
@@ -84,19 +84,42 @@ A combination of `insecure` / `caCert` / `auth` is not supported, only a single 
 This sink supports monitoring metrics and events.
 To use the kafka sink add the following flag:
 
-    --sink="kafka:<?<OPTIONS>>"
+    --sink=kafka:<KAFKA_SERVER_URL>[?<OPTIONS>]
 
 Normally, kafka server has multi brokers, so brokers' list need be configured for producer.
-So, we provide kafka brokers' list and topics about timeseries & topic in url's query string.
-Options can be set in query string, like this:
+So, we can set `KAFKA_SERVER_URL` to a dummy value, and provide kafka brokers' list in url's query string.
+Besides, the following options can be set in query string:
 
-* `brokers` - Kafka's brokers' list. 
-* `timeseriestopic` - Kafka's topic for timeseries. Default value : `heapster-metrics`
-* `eventstopic` - Kafka's topic for events.Default value : `heapster-events`
+* `timeseriestopic` - Kafka's topic for timeseries. Default: `heapster-metrics`
+* `eventstopic` - Kafka's topic for events. Default: `heapster-events`
 
-For example, 
+Like this:
 
-    --sink="kafka:?brokers=localhost:9092&brokers=localhost:9093&timeseriestopic=testseries&eventstopic=testtopic"
+    --sink="kafka:?brokers=0.0.0.0:9092&brokers=0.0.0.0:9093"
+    
+### Elasticsearch
+This sink supports monitoring metrics and events.
+To use the Elasticsearch sink add the following flag:
+
+    --sink=elasticsearch:<ES_SERVER_URL>[?<OPTIONS>]
+
+Normally, elasticsearch cluster has multi nodes or a proxy, so nodes' list or proxy 
+server need be configured for elasticsearch sink.
+Thus, we can set `ES_SERVER_URL` to a dummy value, and provide nodes list or proxy server
+in url's query string.
+Besides, the following options can be set in query string:
+
+* `timeseriesIndex` - ES's index for timeseries. Default: `heapster-metrics`
+* `eventsIndex`     - ES's index for events. Default: `heapster-events`
+
+  if the ES cluster needs authentication, we should provide the username and secret.
+
+* `esUserName`      - ES's user name
+* `esUserSecret`    - ES's user secret
+
+Like this:
+
+    --sink="elasticsearch:?nodes=0.0.0.0:9200&timeseriesIndex=testMetric&eventsIndex=testEvent"
 
 ### Riemann
 This sink supports metrics and events.
@@ -135,14 +158,4 @@ echo '["gcm", "influxdb:http://monitoring-influxdb:8086"]' | curl \
     --insecure -u admin:<password> -X POST -d @- \
     -H "Accept: application/json" -H "Content-Type: application/json" \
     https://<master-ip>/api/v1/proxy/namespaces/kube-system/services/monitoring-heapster/api/v1/sinks
-```
-
-## Using multiple sinks
-
-Heapster can be configured to send k8s metrics and events to multiple sinks by specifying the`--sink=...` flag multiple times.
-
-For example, to send data to both gcm and influxdb at the same time, you can use the following:
-
-```shell
-    --sink=gcm --sink=influxdb:http://monitoring-influxdb:80/
 ```
