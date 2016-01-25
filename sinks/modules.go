@@ -15,6 +15,7 @@
 package sinks
 
 import (
+	_ "k8s.io/heapster/sinks/elasticsearch"
 	_ "k8s.io/heapster/sinks/gcl"
 	_ "k8s.io/heapster/sinks/gcm"
 	_ "k8s.io/heapster/sinks/gcmautoscaling"
@@ -23,5 +24,4 @@ import (
 	_ "k8s.io/heapster/sinks/kafka"
 	_ "k8s.io/heapster/sinks/opentsdb"
 	_ "k8s.io/heapster/sinks/riemann"
-	_ "k8s.io/heapster/sinks/elasticsearch"
 )
