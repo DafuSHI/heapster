@@ -177,6 +177,7 @@ type Client struct {
 // An error is also returned when some configuration option is invalid or
 // the new client cannot sniff the cluster (if enabled).
 func NewClient(options ...ClientOptionFunc) (*Client, error) {
+	fmt.Println("The START START START START START START START START START START START START START")
 	// Set up the client
 	c := &Client{
 		c:                         http.DefaultClient,
@@ -201,6 +202,7 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	// Run the options on it
 	for _, option := range options {
 		if err := option(c); err != nil {
+			fmt.Println("000000000000000000000000000000000000000000000")
 			return nil, err
 		}
 	}
@@ -213,6 +215,7 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	// Check if we can make a request to any of the specified URLs
 	if c.healthcheckEnabled {
 		if err := c.startupHealthcheck(c.healthcheckTimeoutStartup); err != nil {
+			fmt.Println("11111111111111111111111111111111111111111111111111111")
 			return nil, err
 		}
 	}
@@ -220,6 +223,7 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	if c.snifferEnabled {
 		// Sniff the cluster initially
 		if err := c.sniff(c.snifferTimeoutStartup); err != nil {
+			fmt.Println("222222222222222222222222222222222222222")
 			return nil, err
 		}
 	} else {
@@ -235,6 +239,7 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	}
 	// Ensure that we have at least one connection available
 	if err := c.mustActiveConn(); err != nil {
+		fmt.Println("333333333333333333333333333333333333333")
 		return nil, err
 	}
 
@@ -248,7 +253,7 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	c.mu.Lock()
 	c.running = true
 	c.mu.Unlock()
-
+	fmt.Println("The END of SetHttpClient")
 	return c, nil
 }
 

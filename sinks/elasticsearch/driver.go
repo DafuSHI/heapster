@@ -20,13 +20,16 @@ import (
 	"github.com/olivere/elastic"
 	"github.com/pborman/uuid"
 	"k8s.io/heapster/extpoints"
+	"flag"
 	sink_api "k8s.io/heapster/sinks/api"
 	sinkutil "k8s.io/heapster/sinks/util"
 	kube_api "k8s.io/kubernetes/pkg/api"
 	"net/url"
 	"time"
 )
-
+var (
+	argTrunk        = flag.String("trunk", "", "How long the index will be divided to")
+)
 const (
 	timeSeriesIndex = "heapster-metrics"
 	eventsIndex     = "heapster-events"
@@ -97,7 +100,17 @@ func (esSink *elasticSearchSink) StoreTimeseries(timeseries []sink_api.Timeserie
 				sinkPoint.MetricsTags[key] = value
 			}
 		}
-		err := esSink.saveDataFunc(esSink.esClient, esSink.timeSeriesIndex, typeName, sinkPoint)
+		//add a variable
+		var Indextrunck string
+		var err error
+		if *argTrunk == "true" {
+			//glog.Infof("the trunk is %s for metrics", *argTrunk)
+			Indextrunck = esSink.timeSeriesIndex + "_" + fmt.Sprintf(time.Now().Format("20060102"))
+			err = esSink.saveDataFunc(esSink.esClient, Indextrunck, typeName, sinkPoint)
+		} else {
+			err = esSink.saveDataFunc(esSink.esClient, esSink.timeSeriesIndex, typeName, sinkPoint)
+		}
+		
 		if err != nil {
 			return fmt.Errorf("failed to save metrics to ES cluster: %s", err)
 		}
@@ -118,8 +131,18 @@ func (esSink *elasticSearchSink) StoreEvents(events []kube_api.Event) error {
 			EventInvolvedObject: event.InvolvedObject,
 			EventSource:         event.Source,
 		}
+		var Indextrunck string
+		var err error
+		if *argTrunk == "true" {
+			//glog.Infof("the trunk is %s for event", *argTrunk)
+			Indextrunck = esSink.eventsIndex + "_" + fmt.Sprintf(time.Now().Format("20060102"))
+			err = esSink.saveDataFunc(esSink.esClient, Indextrunck, typeName, sinkEvent)
+		} else {
+			err = esSink.saveDataFunc(esSink.esClient, esSink.eventsIndex, typeName, sinkEvent)
+		}
+		//Indextrunck = esSink.eventsIndex + "_" + fmt.Sprintf(time.Now().Format("2006-01-02_15:04"))
+		//err := esSink.saveDataFunc(esSink.esClient, Indextrunck, typeName, sinkEvent)
 
-		err := esSink.saveDataFunc(esSink.esClient, esSink.eventsIndex, typeName, sinkEvent)
 		if err != nil {
 			return fmt.Errorf("failed to save events to ES cluster: %s", err)
 		}
@@ -185,7 +208,7 @@ func (esSink *elasticSearchSink) ping() error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("failed to connect any node of ES cluster")
+		return fmt.Errorf("failed to connect any node of ES cluster from ping")
 	}
 	return nil
 }
@@ -201,7 +224,7 @@ func (esSink *elasticSearchSink) setupClient() error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("failed to connect any node of ES cluster")
+		return fmt.Errorf("failed to connect any node of ES cluster during setupClient")
 	}
 	esSink.esClient = client
 	glog.V(3).Infof("elasticsearch sink setup successfully")

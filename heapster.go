@@ -50,6 +50,8 @@ var (
 	argAllowedUsers    = flag.String("allowed_users", "", "comma-separated list of allowed users")
 	argSources         manager.Uris
 	argSinks           manager.Uris
+	//add a new parametre
+	
 )
 
 func main() {
@@ -60,6 +62,7 @@ func main() {
 	setMaxProcs()
 	glog.Infof(strings.Join(os.Args, " "))
 	glog.Infof("Heapster version %v", version.HeapsterVersion)
+	
 	if err := validateFlags(); err != nil {
 		glog.Fatal(err)
 	}
